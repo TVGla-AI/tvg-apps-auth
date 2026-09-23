@@ -1,0 +1,9 @@
+{
+  "name": "tvg-whoami",
+  "private": true,
+  "type": "module",
+  "description": "Shared /authapi/me endpoint for apps behind Traefik + Authentik",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
