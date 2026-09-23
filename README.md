@@ -33,10 +33,27 @@ Browsers check for changes on every load, but only download the file again after
 | Where the code runs | How to get `tvg-auth.js` | What to call |
 |---|---|---|
 | Static site / no build step | Import from `/authapi/tvg-auth.js` | `fetchAuth()` |
-| Browser code in a bundled app | Either: import from the service, or keep a copy | `fetchAuth()` |
-| Server code (incl. server rendering) | **Keep a copy** — required | `createAuth(req.headers)` / `getUser(req.headers)` |
+| Browser code in a bundled app | Either: import from the service, or install the package | `fetchAuth()` |
+| Server code (incl. server rendering) | **Install the package** — required | `createAuth(req.headers)` / `getUser(req.headers)` |
 
 Browser checks only control what the UI shows. Anything sensitive must still be checked server-side.
+
+### Installing as a package
+
+Install the library from GitHub, pinned to a release tag:
+
+```sh
+npm install github:TVGla-AI/tvg-apps-auth#v1.0.0
+```
+
+```js
+import { createAuth, fetchAuth } from "tvg-apps-auth";
+import type { TVGAuth, TVGUser } from "tvg-apps-auth";   // TypeScript
+```
+
+Only `tvg-auth.js` and its types (`tvg-auth.d.ts`) are installed. The server and Dockerfile are not.
+Pinning to a tag means redeploying the service never changes an app's code.
+To upgrade, change the tag and reinstall.
 
 ### Static sites
 
@@ -60,7 +77,7 @@ If the Authentik session has expired, Authentik redirects to its login page.
 `fetchAuth()` then resolves with `auth.user === null`. Show a "sign in again" link rather than auto-reloading (see [`auth.user`](#authuser)).
 
 In local dev there's no Traefik, so `/authapi/tvg-auth.js` returns 404 and the import itself fails.
-To test locally, use a local copy of `tvg-auth.js` and stub `/authapi/me`.
+To test locally, use a local copy of `tvg-auth.js` (or the installed package) and stub `/authapi/me`.
 
 ### Bundled apps: browser code (Vite, webpack, …)
 
@@ -79,17 +96,17 @@ Trade-offs:
 - Editors can't read its types, so there's no autocomplete or type checking.
 - It changes under the app whenever whoami is redeployed.
 
-**Keep a copy in the codebase.** It works in local dev and gives editor and type support.
-The version stays pinned until you update and test it.
-The trade-off is that copies can drift from this folder.
-The functions (`hasGroup`, `hasAllGroups`, `hasAnyGroup`, `isAdmin`) are kept stable, so an older copy keeps working.
+**Install the package** ([see above](#installing-as-a-package)). It works in local dev and gives editor and type support.
+The version stays pinned to the tag until you upgrade and test it.
+The trade-off is that apps can fall behind the latest release.
+The functions (`hasGroup`, `hasAllGroups`, `hasAnyGroup`, `isAdmin`) are kept stable, so an older version keeps working.
 
 ### Server code
 
-Always keep a copy in the codebase:
+Always [install the package](#installing-as-a-package):
 
 ```js
-import { createAuth } from "./lib/tvg-auth.js";
+import { createAuth } from "tvg-apps-auth";
 
 const auth = createAuth(req.headers);          // Express / Node
 // const auth = createAuth(await headers());   // Next.js App Router
@@ -258,7 +275,7 @@ parseGroups("tvg-admins|tvg-editors");    // ["tvg-admins", "tvg-editors"]
 
 ```js
 // Express API — enforce the same rules server-side
-import { createAuth } from "./lib/tvg-auth.js";
+import { createAuth } from "tvg-apps-auth";
 
 app.get("/api/reports", (req, res) => {
   const auth = createAuth(req.headers);
@@ -326,3 +343,12 @@ To exclude a domain, add a host check:
 |---|---|---|
 | `PORT` | `3000` | Listen port |
 | `BASE_PATH` | `/authapi` | Path prefix. Serves `<BASE_PATH>/me` and `<BASE_PATH>/tvg-auth.js`. Keep in sync with the Traefik rule. |
+
+## Releasing a new version
+
+1. Change `tvg-auth.js`.
+2. Run `npm run types` to regenerate `tvg-auth.d.ts`, and commit both files.
+3. Bump `version` in `package.json`.
+4. Tag and push: `git tag vX.Y.Z && git push origin main --tags`.
+
+Apps upgrade by installing the new tag. Redeploying the service updates `/authapi/tvg-auth.js` for sites that import it remotely.

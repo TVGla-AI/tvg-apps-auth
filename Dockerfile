@@ -1,6 +1,6 @@
-# Self-contained — build from this folder:
-#   docker build -t tvg-whoami whoami
-# In Coolify: Base Directory "/whoami", Dockerfile Location "/Dockerfile".
+# Self-contained — build from the repo root:
+#   docker build -t tvg-apps-auth .
+# In Coolify: Base Directory "/", Dockerfile Location "/Dockerfile".
 FROM node:24-alpine
 
 WORKDIR /app

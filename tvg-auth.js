@@ -49,6 +49,11 @@
  * @property {string} [adminGroup="tvg-admins"] Group that grants admin access.
  */
 
+/**
+ * The object returned by createAuth, fetchAuth and authFromUser.
+ * @typedef {ReturnType<typeof authFromUser>} TVGAuth
+ */
+
 const DEFAULT_ADMIN_GROUP = "tvg-admins";
 
 /**
@@ -183,6 +188,7 @@ export function authFromUser(user, options = {}) {
  * Server-side: builds an auth object bound to one request's headers.
  * @param {HeaderSource} source
  * @param {AuthOptions} [options]
+ * @returns {TVGAuth}
  */
 export function createAuth(source, options = {}) {
   return authFromUser(getUser(source), options);
@@ -196,6 +202,7 @@ export function createAuth(source, options = {}) {
  * Authentik session redirects to the login page) — it never throws.
  * @param {string} [endpoint="/authapi/me"]
  * @param {AuthOptions} [options]
+ * @returns {Promise<TVGAuth>}
  */
 export async function fetchAuth(endpoint = "/authapi/me", options = {}) {
   let res;

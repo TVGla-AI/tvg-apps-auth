@@ -1,9 +1,23 @@
 {
-  "name": "tvg-whoami",
+  "name": "tvg-apps-auth",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Shared /authapi/me endpoint for apps behind Traefik + Authentik",
+  "description": "Shared /authapi/me endpoint and auth helpers for apps behind Traefik + Authentik",
+  "main": "./tvg-auth.js",
+  "types": "./tvg-auth.d.ts",
+  "exports": {
+    ".": {
+      "types": "./tvg-auth.d.ts",
+      "default": "./tvg-auth.js"
+    }
+  },
+  "files": [
+    "tvg-auth.js",
+    "tvg-auth.d.ts"
+  ],
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "types": "npx -p typescript tsc tvg-auth.js --allowJs --declaration --emitDeclarationOnly --skipLibCheck --target es2022 --lib es2022,dom"
   }
 }
