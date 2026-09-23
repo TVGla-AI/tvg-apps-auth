@@ -1,4 +1,4 @@
-# tvg-whoami
+# tvg-apps-auth
 
 A single shared `GET /authapi/me` endpoint for every Coolify app behind Traefik + Authentik.
 Traefik sends `/authapi/me` on **every domain** here through the `authentik` middleware.
