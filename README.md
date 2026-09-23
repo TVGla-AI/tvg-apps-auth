@@ -11,7 +11,7 @@ Pages can import the current version directly instead of keeping a copy.
 ```
 Browser ──GET https://anyapp.tvgla.com/authapi/me──▶ Traefik
          (authentik middleware adds X-Authentik-*)
-                                              └──▶ tvg-whoami ──▶ { "data": { username, email, name, groups } }
+                                              └──▶ tvg-apps-auth ──▶ { "data": { username, email, name, groups } }
 ```
 
 ## Responses
