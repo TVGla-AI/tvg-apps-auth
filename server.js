@@ -1,4 +1,4 @@
-// tvg-whoami — shared "who am I" endpoint for every app behind Traefik + Authentik.
+// tvg-apps-auth — shared "who am I" endpoint for every app behind Traefik + Authentik.
 //
 // Traefik routes these paths on every domain here (through the authentik
 // middleware), so any app — including static sites — can use them without a
@@ -89,7 +89,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`tvg-whoami listening on :${PORT} (${ME_PATH}, ${LIB_PATH})`);
+  console.log(`tvg-apps-auth listening on :${PORT} (${ME_PATH}, ${LIB_PATH})`);
 });
 
 for (const signal of ["SIGTERM", "SIGINT"]) {

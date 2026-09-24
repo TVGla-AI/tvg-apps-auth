@@ -70,7 +70,7 @@ Import the library straight from the service:
 ```
 
 This works on any static site served through Traefik, with no backend, build step or copy of the library.
-Every site picks up a new version as soon as whoami is redeployed.
+Every site picks up a new version as soon as tvg-apps-auth is redeployed.
 
 `fetchAuth()` never throws.
 If the Authentik session has expired, Authentik redirects to its login page.
@@ -94,7 +94,7 @@ Or mark `/authapi/tvg-auth.js` as external in the bundler config.
 Trade-offs:
 - It fails in local dev without Traefik.
 - Editors can't read its types, so there's no autocomplete or type checking.
-- It changes under the app whenever whoami is redeployed.
+- It changes under the app whenever tvg-apps-auth is redeployed.
 
 **Install the package** ([see above](#installing-as-a-package)). It works in local dev and gives editor and type support.
 The version stays pinned to the tag until you upgrade and test it.
@@ -115,7 +115,7 @@ if (!auth.hasGroup("tvg-editors")) return new Response("Forbidden", { status: 40
 
 Importing from `/authapi/tvg-auth.js` can't work on the server:
 - Node treats `/authapi/tvg-auth.js` as a file path on disk, not a URL.
-- A request made from inside the container never passes through Traefik, so it can't reach the whoami service.
+- A request made from inside the container never passes through Traefik, so it can't reach the tvg-apps-auth service.
 
 This applies to the server-rendering parts of Next.js, Remix, SvelteKit and similar frameworks too.
 The server already has the headers, so it doesn't need `/authapi/me` at all.
@@ -175,7 +175,7 @@ The logged-in user, or `null` when there isn't one.
 if (auth.user) {
   greeting.textContent = `Hi, ${auth.user.name}`;
 } else {
-  // Don't auto-reload: if whoami is down (or in local dev) that loops forever.
+  // Don't auto-reload: if tvg-apps-auth is down (or in local dev) that loops forever.
   // Loading any page through Traefik sends the user to Authentik login.
   greeting.innerHTML = `Session expired — <a href="${location.href}">sign in again</a>`;
 }
@@ -300,13 +300,13 @@ For example, as a Docker Compose resource with Coolify's "Connect to Predefined 
 
 ```yaml
 services:
-  tvg-whoami:
+  tvg-apps-auth:
     build: .              # this folder
-    container_name: tvg-whoami
+    container_name: tvg-apps-auth
     restart: unless-stopped
 ```
 
-Or build the Dockerfile directly (`docker build -t tvg-whoami .` from this folder).
+Or build the Dockerfile directly (`docker build -t tvg-apps-auth .` from this folder).
 The folder is self-contained, so it can also be moved into its own repo as-is.
 
 ### 2. Add the router to the Traefik dynamic config (`authentik-headers.yaml`)
@@ -314,19 +314,19 @@ The folder is self-contained, so it can also be moved into its own repo as-is.
 ```yaml
 http:
   routers:
-    authentik-whoami:
+    authentik-apps-auth:
       rule: PathPrefix(`/authapi/`)
       entryPoints:
         - http            # match the entry points your other authentik routers use
       middlewares:
         - authentik@file  # REQUIRED — this is what authenticates and adds the headers
-      service: tvg-whoami-svc
+      service: tvg-apps-auth-svc
       priority: 15000
   services:
-    tvg-whoami-svc:
+    tvg-apps-auth-svc:
       loadBalancer:
         servers:
-          - url: 'http://tvg-whoami:3000'
+          - url: 'http://tvg-apps-auth:3000'
 ```
 
 Also add `X-authentik-name` to the middleware's `authResponseHeaders`.
